@@ -34,3 +34,7 @@ case class GCounter[IdT](id: IdT, vals: Map[IdT, Long]) {
     })
 
 }
+
+object GCounter {
+  def apply[IdT](id: IdT): GCounter[IdT] = GCounter(id, Map())
+}
