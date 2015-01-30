@@ -5,12 +5,13 @@ package crdts
  * 
  * @tparam IdT type of the node identifier
  */
-class GCounter[IdT](private val id: IdT, private val vals: Map[IdT, Long]) {
+case class GCounter[IdT](id: IdT, vals: Map[IdT, Long]) {
 
   // -------------------------------------------- Public methods
 
   /** Increments the counter locally with the given delta. */
-  def increment(delta: Long = 1): GCounter[IdT] =
+  def increment: GCounter[IdT] = increment(1)
+  def increment(delta: Long): GCounter[IdT] =
     new GCounter(id, {
       val local = vals.getOrElse[Long](id, 0)
       vals + (id -> (local + delta))
