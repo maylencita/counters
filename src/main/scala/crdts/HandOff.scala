@@ -5,7 +5,7 @@ import scala.collection.SortedMap
 object HandOff {
 
   private type ID = String
-  private type Tier = String
+  private type Tier = Int
   private type Clock = Int
   private type Value = Int
 

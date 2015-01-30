@@ -10,7 +10,7 @@ import scala.concurrent.duration.FiniteDuration
 import com.typesafe.config.ConfigFactory
 
 class SmartServer extends Actor{
-  private var counter = HandOff.Node("server", "0")
+  private var counter = HandOff.Node("server", 0)
 
   override def receive: Receive = {
     case SmartUpdate(other) =>
