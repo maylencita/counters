@@ -4,10 +4,10 @@ import scala.collection.SortedMap
 
 object HandOff {
 
-  type ID = String
-  type Tier = String
-  type Clock = Int
-  type Value = Int
+  private type ID = String
+  private type Tier = String
+  private type Clock = Int
+  private type Value = Int
 
   case class Node(
       id: ID,
@@ -30,8 +30,10 @@ object HandOff {
         case (acc, op) => op(acc, other)
       }
 
-    def valueOf(id: String): Value = values.getOrElse(id, 0)
+    private[HandOff] def valueOf(id: String): Value = values.getOrElse(id, 0)
   }
+  
+  // END OF PUBLIC API
 
   private object Ops {
 
