@@ -33,7 +33,7 @@ object HandOff {
     def valueOf(id: String): Value = values.getOrElse(id, 0)
   }
 
-  object Ops {
+  private object Ops {
 
     val list: List[(Node, Node) => Node] = List(
       fillSlots,
@@ -59,7 +59,10 @@ object HandOff {
         a.copy(slots = a.slots - b.id)
       else a
 
-    def mergeVectors(a: Node, b: Node) = a
+    def mergeVectors(a: Node, b: Node) =
+      if (a.tier == 0 && b.tier == 0)
+        a.copy(values = Util.mergeWith(Seq(a.values, b.values))(math.max _))
+      else a
 
     def aggregate(a: Node, b: Node) = a
 
@@ -68,5 +71,21 @@ object HandOff {
     def createToken(a: Node, b: Node) = a
 
     def cacheTokens(a: Node, b: Node) = a
+  }
+
+  private object Util {
+
+    def mergeWith[K: Ordering, V](maps: Seq[SortedMap[K, V]])(f: (V, V) => V): SortedMap[K, V] = {
+      maps.foldLeft(SortedMap.empty[K, V]) {
+        case (merged, m) =>
+          m.foldLeft(merged) {
+            case (acc, (k, v)) =>
+              acc.get(k) match {
+                case Some(existing) => acc.updated(k, f(existing, v))
+                case None           => acc.updated(k, v)
+              }
+          }
+      }
+    }
   }
 }
