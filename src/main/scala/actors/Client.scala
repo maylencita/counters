@@ -4,6 +4,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import akka.actor._
+import com.typesafe.config.ConfigFactory
 import crdts.GCounter
 
 import scala.concurrent.Future
@@ -37,7 +38,7 @@ object Client {
 
   def apply()(implicit actorSystem: ActorSystem): ActorRef = Client(FiniteDuration(100, TimeUnit.MILLISECONDS))
   def apply(interval: FiniteDuration)(implicit actorSystem: ActorSystem): ActorRef = {
-    val server = actorSystem.actorSelection("akka.tcp://gcounterSystem@127.0.0.1:2552/server")
+    val server = actorSystem.actorSelection("akka.tcp://gcounterSystem@127.0.0.1:2552/user/server")
 
     val client = actorSystem.actorOf(Props(classOf[Client], server), UUID.randomUUID().toString)
 
@@ -47,13 +48,20 @@ object Client {
 
     // Keep incrementing the counter for a while
     Future {
-      (1 to 100000) foreach { _ =>
+      (1 to 100) foreach { _ =>
         client ! Increment
-        Thread.sleep(10)
+        Thread.sleep(100)
       }
+
+      println("Stopped incrementing the counter now .. ")
     }
 
     client
+  }
+
+  def main(args: Array[String]): Unit = {
+    implicit val actorSystem = ActorSystem("gcounterSystem", ConfigFactory.load("client.conf"))
+    Client()
   }
 
 }
