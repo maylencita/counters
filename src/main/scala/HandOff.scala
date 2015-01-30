@@ -34,7 +34,13 @@ object HandOff {
   object Ops {
 
     val list: List[(Node, Node) => Node] = List(
-      fillSlots)
+      fillSlots,
+      discardSlot,
+      mergeVectors,
+      aggregate,
+      discardTokens,
+      createToken,
+      cacheTokens)
 
     def fillSlots(a: Node, b: Node) = a
 
@@ -46,7 +52,7 @@ object HandOff {
 
     def discardTokens(a: Node, b: Node) = a
 
-    def createTokens(a: Node, b: Node) = a
+    def createToken(a: Node, b: Node) = a
 
     def cacheTokens(a: Node, b: Node) = a
   }
