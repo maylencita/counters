@@ -24,7 +24,7 @@ class Server extends Actor {
       sender() ! Update(counter)
 
     case Print =>
-      println("Current value: " + counter.get)
+      println(s"Counter for ${counter.id} is ${counter.get}.")
   }
 
 }
