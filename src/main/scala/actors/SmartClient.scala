@@ -17,7 +17,7 @@ import scala.concurrent.duration.FiniteDuration
 case class SmartUpdate(counter: HandOff.Node)
 
 class SmartClient(server: ActorSelection) extends Actor {
-  private var counter = HandOff.Node("client-" + UUID.randomUUID().toString, "1")
+  private var counter = HandOff.Node("client-" + UUID.randomUUID().toString, 1)
 
   override def receive: Receive = {
     case SmartUpdate(other) =>
@@ -49,7 +49,7 @@ object SmartClient {
 
     // Keep incrementing the counter for a while
     Future {
-      (1 to 100) foreach { _ =>
+      (1 to 10) foreach { _ =>
         client ! Increment
         Thread.sleep(100)
       }
