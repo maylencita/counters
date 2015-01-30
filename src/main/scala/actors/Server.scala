@@ -3,6 +3,7 @@ package actors
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Props, ActorRef, ActorSystem, Actor}
+import com.typesafe.config.ConfigFactory
 import crdts.GCounter
 
 import scala.concurrent.duration.FiniteDuration
@@ -21,6 +22,9 @@ class Server extends Actor {
 
     case Print =>
       println(s"Counter for ${counter.id} is ${counter.get}.")
+
+    case other =>
+      println(s"Received unknown message $other")
   }
 
 }
@@ -28,11 +32,17 @@ class Server extends Actor {
 object Server {
   def apply()(implicit actorSystem: ActorSystem): ActorRef = Server(FiniteDuration(5, TimeUnit.SECONDS))
   def apply(interval: FiniteDuration)(implicit actorSystem: ActorSystem): ActorRef = {
-    val server = actorSystem.actorOf(Props[Server])
+    val server = actorSystem.actorOf(Props[Server], "server")
 
     implicit val ec = actorSystem.dispatcher
     actorSystem.scheduler.schedule(interval, interval, server, Print)
 
     server
   }
+
+  def main(args: Array[String]): Unit = {
+    implicit val actorSystem = ActorSystem("gcounterSystem", ConfigFactory.load("server.conf"))
+    Server()
+  }
+
 }
