@@ -15,20 +15,20 @@ object HandOff {
       sck: Clock = 0,
       dck: Clock = 0,
       slots: SortedMap[ID, (Clock, Clock)],
-      tokens: SortedMap[ID, (Clock, (Clock, Clock))],
+      tokens: SortedMap[(ID, ID), ((Clock, Clock), Value)],
       values: SortedMap[ID, Value]) {
 
     def incr: Node = copy(
       value = value + 1,
-      values = values.get(id).fold(SortedMap(id -> 1)) { v =>
-        values + (id -> (v + 1))
-      })
+      values = values + (id -> (valueOf(id) + 1)))
 
     def join(other: Node): Node =
       if (id == other.id) this
       else Ops.list.foldLeft(this) {
         case (acc, op) => op(acc, other)
       }
+
+    def valueOf(id: String): Value = values.getOrElse(id, 0)
   }
 
   object Ops {
@@ -42,7 +42,15 @@ object HandOff {
       createToken,
       cacheTokens)
 
-    def fillSlots(a: Node, b: Node) = a
+    def fillSlots(a: Node, b: Node) = {
+      val S = for {
+        ((src, dst), ((sck, dck), n)) <- b.tokens
+        if dst == a.id && a.slots.get(src).fold(false)((sck, dck) ==)
+      } yield (src, n)
+      a.copy(
+        values = a.values + (a.id -> (a.valueOf(a.id) + S.map(_._2).sum)),
+        slots = a.slots -- S.map(_._1))
+    }
 
     def discardSlot(a: Node, b: Node) = a
 
