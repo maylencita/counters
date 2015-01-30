@@ -114,7 +114,7 @@ class BlogSpec extends MultiNodeSpec(BlogSpec)
       runOn(node1) {
         val postRegion = ClusterSharding(system).shardRegion(Post.shardName)
         postRegion ! Post.AddPost(postId,
-          Post.PostContent("Patrik", "Sharding algorithms", "Splitting shards..."))
+          Post.PostContent("Patrik", "Sharding algorithms", "Splitting shards...", likes = 5))
         postRegion ! Post.ChangeBody(postId,
           "Splitting shards across multiple...")
       }
@@ -124,7 +124,7 @@ class BlogSpec extends MultiNodeSpec(BlogSpec)
         awaitAssert {
           within(1.second) {
             postRegion ! Post.GetContent(postId)
-            expectMsg(Post.PostContent("Patrik", "Sharding algorithms", "Splitting shards across multiple..."))
+            expectMsg(Post.PostContent("Patrik", "Sharding algorithms", "Splitting shards across multiple...", likes = 5))
           }
         }
       }
@@ -137,7 +137,7 @@ class BlogSpec extends MultiNodeSpec(BlogSpec)
         val postRegion = ClusterSharding(system).shardRegion(Post.shardName)
         val postId = UUID.randomUUID().toString
         postRegion ! Post.AddPost(postId,
-          Post.PostContent("Patrik", "Hash functions", "A hash function should be deterministic..."))
+          Post.PostContent("Patrik", "Hash functions", "A hash function should be deterministic...", likes = 5))
         postRegion ! Post.Publish(postId)
       }
 
