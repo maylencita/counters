@@ -7,10 +7,6 @@ import crdts.GCounter
 
 import scala.concurrent.duration.FiniteDuration
 
-case class Update(counter: GCounter[String])
-
-case object Print
-
 /**
  *
  */
@@ -19,9 +15,9 @@ class Server extends Actor {
   private var counter = GCounter[String]("server")
 
   override def receive: Receive = {
-    case Update(other) =>
+    case ReceiveUpdate(other) =>
       counter = counter.merge(other)
-      sender() ! Update(counter)
+      sender() ! ReceiveUpdate(counter)
 
     case Print =>
       println(s"Counter for ${counter.id} is ${counter.get}.")

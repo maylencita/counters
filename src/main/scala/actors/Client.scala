@@ -5,8 +5,6 @@ import java.util.UUID
 import akka.actor.{ActorRef, Actor}
 import crdts.GCounter
 
-case object Tick
-
 /**
  *
  */
@@ -15,14 +13,17 @@ class Client(server: ActorRef) extends Actor {
   private var counter = GCounter[String]("client-" + UUID.randomUUID().toString)
 
   override def receive: Receive = {
-    case Update(other) =>
+    case ReceiveUpdate(other) =>
       counter = counter.merge(other)
 
-    case Tick =>
+    case Increment =>
       val increment = (Math.random() * 10).asInstanceOf[Int]
       counter = counter.increment(increment)
-      server ! Update(counter)
 
+    case SendUpdate =>
+      server ! ReceiveUpdate(counter)
+
+    case Print =>
       println(s"Counter for ${counter.id} is ${counter.get}.")
   }
 
