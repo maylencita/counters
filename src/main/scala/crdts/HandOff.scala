@@ -1,3 +1,5 @@
+package crdts
+
 import scala.collection.SortedMap
 
 object HandOff {
