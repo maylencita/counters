@@ -95,7 +95,15 @@ object HandOff {
             }
         })
 
-    def createToken(a: Node, b: Node) = a
+    def createToken(a: Node, b: Node) =
+      b.slots.get(a.id) match {
+        case Some((sck, dck)) if sck == a.sck =>
+          a.copy(
+            tokens = a.tokens + ((a.id -> b.id) -> ((sck -> dck) -> a.valueOf(a.id))),
+            values = a.values + (a.id -> 0),
+            sck = a.sck + 1)
+        case _ => a
+      }
 
     def cacheTokens(a: Node, b: Node) = a
   }
