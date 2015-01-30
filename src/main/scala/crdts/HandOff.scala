@@ -16,9 +16,9 @@ object HandOff {
       below: Int = 0,
       sck: Clock = 0,
       dck: Clock = 0,
-      slots: SortedMap[ID, (Clock, Clock)],
-      tokens: SortedMap[(ID, ID), ((Clock, Clock), Value)],
-      values: SortedMap[ID, Value]) {
+      slots: SortedMap[ID, (Clock, Clock)] = SortedMap[ID, (Clock, Clock)](),
+      tokens: SortedMap[(ID, ID), ((Clock, Clock), Value)] = SortedMap[(ID, ID), ((Clock, Clock), Value)](),
+      values: SortedMap[ID, Value] = SortedMap[ID, Value]()) {
 
     def incr: Node = copy(
       value = value + 1,
@@ -32,7 +32,7 @@ object HandOff {
 
     private[HandOff] def valueOf(id: String): Value = values.getOrElse(id, 0)
   }
-  
+
   // END OF PUBLIC API
 
   private object Ops {

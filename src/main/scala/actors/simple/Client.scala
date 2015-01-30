@@ -58,7 +58,7 @@ object Client {
   }
 
   def main(args: Array[String]): Unit = {
-    implicit val actorSystem = ActorSystem("gcounterSystem", ConfigFactory.load("client.conf"))
+    implicit val actorSystem = ActorSystem("dummycounterSystem", ConfigFactory.load("client.conf"))
     Client()
   }
 
