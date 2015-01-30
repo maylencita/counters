@@ -105,7 +105,18 @@ object HandOff {
         case _ => a
       }
 
-    def cacheTokens(a: Node, b: Node) = a
+    def cacheTokens(a: Node, b: Node) =
+      if (a.tier < b.tier) a.copy(
+        tokens = Util.mergeWith(
+          Seq(
+            a.tokens,
+            b.tokens filter {
+              case ((src, dst), _) => src == b.id && dst != a.id
+            })) {
+            case (t1@((sck1, _), _), t2@((sck2, _), _)) =>
+              if (sck1 >= sck2) t1 else t2
+          })
+      else a
   }
 
   private object Util {
