@@ -54,7 +54,10 @@ object HandOff {
         slots = a.slots -- S.map(_._1))
     }
 
-    def discardSlot(a: Node, b: Node) = a
+    def discardSlot(a: Node, b: Node) =
+      if (a.slots.get(b.id).fold(false) { case (sck, _) => b.sck > sck })
+        a.copy(slots = a.slots - b.id)
+      else a
 
     def mergeVectors(a: Node, b: Node) = a
 
