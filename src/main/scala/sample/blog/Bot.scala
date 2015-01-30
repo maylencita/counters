@@ -34,10 +34,11 @@ class Bot extends Actor with ActorLogging {
 
   val create: Receive = {
     case Tick =>
+      //TODO Only post one article then like it
       val postId = UUID.randomUUID().toString
       n += 1
       val title = s"Post $n from $from"
-      postRegion ! Post.AddPost(postId, Post.PostContent(currentAuthor, title, "..."))
+      postRegion ! Post.AddPost(postId, Post.PostContent(currentAuthor, title, "...", 0))
       context.become(edit(postId))
   }
 
@@ -58,6 +59,10 @@ class Bot extends Actor with ActorLogging {
       listingsRegion ! AuthorListing.GetPosts(currentAuthor)
     case AuthorListing.Posts(summaries) =>
       log.info("Posts by {}: {}", currentAuthor, summaries.map(_.title).mkString("\n\t", "\n\t", ""))
+      //Liking some article
+      summaries.foreach{
+        post => postRegion ! Post.Like(post.postId)
+      }
       context.become(create)
   }
 

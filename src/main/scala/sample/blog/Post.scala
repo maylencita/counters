@@ -16,9 +16,9 @@ object Post {
     Props(new Post(authorListing))
 
   object PostContent {
-    val empty = PostContent("", "", "")
+    val empty = PostContent("", "", "", 0)
   }
-  case class PostContent(author: String, title: String, body: String)
+  case class PostContent(author: String, title: String, body: String, likes: Int)
 
   sealed trait Command {
     def postId: String
@@ -27,11 +27,13 @@ object Post {
   case class GetContent(postId: String) extends Command
   case class ChangeBody(postId: String, body: String) extends Command
   case class Publish(postId: String) extends Command
+  case class Like(postId: String) extends Command
 
   sealed trait Event
   case class PostAdded(content: PostContent) extends Event
   case class BodyChanged(body: String) extends Event
   case object PostPublished extends Event
+  case object PostLiked extends Event
 
   val idExtractor: ShardRegion.IdExtractor = {
     case cmd: Command => (cmd.postId, cmd)
@@ -49,6 +51,7 @@ object Post {
       case PostAdded(c)   => copy(content = c)
       case BodyChanged(b) => copy(content = content.copy(body = b))
       case PostPublished  => copy(published = true)
+      case PostLiked => copy(content = content.copy(likes = content.likes + 1)) //FIXME Use counters here
     }
   }
 }
@@ -57,7 +60,7 @@ class Post(authorListing: ActorRef) extends PersistentActor with ActorLogging {
 
   import Post._
 
-  // self.path.parent.name is the type name (utf-8 URL-encoded) 
+  // self.path.parent.name is the type name (utf-8 URL-encoded)
   // self.path.name is the entry identifier (utf-8 URL-encoded)
   override def persistenceId: String = self.path.parent.name + "-" + self.path.name
 
@@ -104,6 +107,12 @@ class Post(authorListing: ActorRef) extends PersistentActor with ActorLogging {
         val c = state.content
         log.info("Post published: {}", c.title)
         authorListing ! AuthorListing.PostSummary(c.author, postId, c.title)
+      }
+    case Like(postId) =>
+      persist(PostLiked) { evt =>
+        state = state.updated(evt)
+        log.info("Post liked: {}", state.content.title)
+        //TODO maybe notify authorListing
       }
   }
 
