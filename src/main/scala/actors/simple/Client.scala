@@ -1,23 +1,20 @@
-package actors
+package actors.simple
 
-import akka.actor.{ActorRef, Actor}
-import crdts.GCounter
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-import akka.actor._
+import actors.gcounter.{Increment, Print, SendUpdate}
+import akka.actor.{Actor, ActorRef, _}
 import com.typesafe.config.ConfigFactory
-import crdts.GCounter
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
-
 case class SimpleUpdate(count: Int)
 case class SimpleState(id: String, count:Int)
 
-class DummyClient(server: ActorRef) extends Actor {
-  private var counter = SimpleState("client-" + UUID.randomUUID().toString, 0)
+class Client(server: ActorSelection) extends Actor {
+  private var counter = SimpleState("client-" + self.path.name, 0)
 
   override def receive: Receive = {
     case SimpleUpdate(other) =>
@@ -35,13 +32,13 @@ class DummyClient(server: ActorRef) extends Actor {
 
 }
 
-object DummyClient {
+object Client {
 
   def apply()(implicit actorSystem: ActorSystem): ActorRef = Client(FiniteDuration(100, TimeUnit.MILLISECONDS))
   def apply(interval: FiniteDuration)(implicit actorSystem: ActorSystem): ActorRef = {
-    val server = actorSystem.actorSelection("akka.tcp://dummycounterSystem@127.0.0.1:2552/user/server")
+    val server = actorSystem.actorSelection("akka.tcp://dummycounterSystem@127.0.0.1:2552/user/dummy-server")
 
-    val client = actorSystem.actorOf(Props(classOf[DummyClient], server), UUID.randomUUID().toString)
+    val client = actorSystem.actorOf(Props(classOf[Client], server), UUID.randomUUID().toString)
 
     implicit val ec = actorSystem.dispatcher
     actorSystem.scheduler.schedule(interval, interval, client, SendUpdate)

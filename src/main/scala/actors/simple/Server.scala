@@ -1,14 +1,14 @@
-package actors
+package actors.simple
 
-import akka.actor.{Props, ActorRef, ActorSystem, Actor}
-import crdts.GCounter
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-import scala.concurrent.duration.FiniteDuration
+import actors.gcounter.Print
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 
-class DummyServer extends Actor{
+import scala.concurrent.duration.FiniteDuration
+
+class Server extends Actor{
   private var counter = SimpleState("server", 0)
 
   override def receive: Receive = {
@@ -22,10 +22,10 @@ class DummyServer extends Actor{
 
 }
 
-object DummyServer{
+object Server {
   def apply()(implicit actorSystem: ActorSystem): ActorRef = Server(FiniteDuration(5, TimeUnit.SECONDS))
   def apply(interval: FiniteDuration)(implicit actorSystem: ActorSystem): ActorRef = {
-    val server = actorSystem.actorOf(Props[DummyServer], "dummy-server")
+    val server = actorSystem.actorOf(Props[Server], "dummy-server")
 
     implicit val ec = actorSystem.dispatcher
     actorSystem.scheduler.schedule(interval, interval, server, Print)

@@ -1,4 +1,4 @@
-package actors
+package actors.gcounter
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit

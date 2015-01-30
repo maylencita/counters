@@ -1,8 +1,8 @@
-package actors
+package actors.gcounter
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Props, ActorRef, ActorSystem, Actor}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import crdts.GCounter
 
