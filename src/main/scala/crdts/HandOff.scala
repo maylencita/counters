@@ -16,9 +16,9 @@ object HandOff {
       below: Int = 0,
       sck: Clock = 0,
       dck: Clock = 0,
-      slots: SortedMap[ID, (Clock, Clock)] = SortedMap[ID, (Clock, Clock)](),
-      tokens: SortedMap[(ID, ID), ((Clock, Clock), Value)] = SortedMap[(ID, ID), ((Clock, Clock), Value)](),
-      values: SortedMap[ID, Value] = SortedMap[ID, Value]()) {
+      slots: SortedMap[ID, (Clock, Clock)] = SortedMap.empty,
+      tokens: SortedMap[(ID, ID), ((Clock, Clock), Value)] = SortedMap.empty,
+      values: SortedMap[ID, Value] = SortedMap.empty) {
 
     def incr: Node = copy(
       value = value + 1,
@@ -128,9 +128,8 @@ object HandOff {
         case (merged, m) =>
           m.foldLeft(merged) {
             case (acc, (k, v)) =>
-              acc.get(k) match {
-                case Some(existing) => acc.updated(k, f(existing, v))
-                case None           => acc.updated(k, v)
+              acc.get(k).fold(acc + (k -> v)) { existing =>
+                acc + (k -> f(existing, v))
               }
           }
       }
