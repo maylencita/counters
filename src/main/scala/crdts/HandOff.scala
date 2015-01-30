@@ -64,7 +64,24 @@ object HandOff {
         a.copy(values = Util.mergeWith(Seq(a.values, b.values))(math.max _))
       else a
 
-    def aggregate(a: Node, b: Node) = a
+    def aggregate(a: Node, b: Node) = {
+
+      val below =
+        if (a.tier == b.tier) a.below max b.below
+        else if (a.tier > b.tier) a.below max b.value
+        else a.below
+
+      val value =
+        if (a.tier == 0) a.values.map(_._2).sum
+        else if (a.tier == b.tier) a.value max b.value max {
+          below + a.valueOf(a.id) + b.valueOf(b.id)
+        }
+        else b.value max (below + a.valueOf(a.id))
+
+      a.copy(
+        below = below,
+        value = value)
+    }
 
     def discardTokens(a: Node, b: Node) = a
 
