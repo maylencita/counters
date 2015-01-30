@@ -83,7 +83,17 @@ object HandOff {
         value = value)
     }
 
-    def discardTokens(a: Node, b: Node) = a
+    def discardTokens(a: Node, b: Node) =
+      a.copy(
+        tokens = a.tokens filterNot {
+          case ((src, dst), ((_, dck), _)) =>
+            (dst == b.id) && {
+              b.slots.get(src) match {
+                case Some((_, dck2)) => dck2 > dck
+                case None            => b.dck > dck
+              }
+            }
+        })
 
     def createToken(a: Node, b: Node) = a
 
